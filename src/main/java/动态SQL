@@ -1,0 +1,55 @@
+选择语句
+        <choose>
+            <when test=""></when>
+            <when test=""></when>
+            <otherwise></otherwise>
+        </choose>
+if 标签  查询      一般比较low的做法是 1=1 and 限制条件
+where 标签
+可以解决前缀and的问题但是不能解决and是后缀的问题
+set 标签
+可以解决 set username=1， 后面的逗号问题
+trim 标签可以替换 where ，set
+perfix 用来设置包含的SQL语句的前缀，suffix 用来设置包含的SQL语句的后缀
+perfixOverriders 用来设置其中单项前缀多余什么就消除什么
+suffixOverriders 用来设置其中单项后缀多余什么就消除什么
+        消除and在单项SQL语句（if判断）的问题
+        <trim prefix="where"  suffixOverrides="and"></trim>
+        消除set中单项后面，号的问题
+         <trim prefix="set"  suffixOverrides=","></trim>
+
+foreach
+        /*
+          用来指定要遍历的集合：
+              list类型的参数会特殊处理封装在map中，map的key就叫list
+              item：将当前遍历出的元素赋值给指定的变量
+              separator：每个元素之间的分隔符
+              open：遍历出结果拼接的开始的字符串
+              close:遍历结束拼接的字符串
+              index：索引，遍历list的时候index就是索引，item就是当前值
+                            遍历map的时候index表示的就是map的key，
+                            item就是key的值
+        */
+        <foreach collection="ids" separator="," open="(" close=")" item="item_id">
+              #{item_id}
+        </foreach>
+批量保存 的两种方式
+       <insert id="">
+           insert  into customer values
+           <foreach collection="customers" item="customer" open="(" separator="," close=")">
+               #{customer.username},#{customer.jobs},#{phone}
+           </foreach>
+       </insert>
+       <insert id="">
+            <foreach collection="customers" item="customer">
+            insert  into customer values
+            #{customer.username},#{customer.jobs},#{phone},#{customer.dept.id}
+          </foreach>
+       </insert>
+进行模糊查询的时候，可以进行对象的属性的值的绑定
+       比如查询%2%的名字的customer，一般可以进行2的传递，
+       如果传值只用2时：
+       传值过去了可以用%${2}% 但是这是静态的SQL语句，是不安全的
+       可以在增删查改中利用
+               <bind name="_username" value="'%'+username+'%'"/>
+               username like  #{_usename}   的方式进行模糊查询

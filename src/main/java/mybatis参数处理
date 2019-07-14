@@ -1,0 +1,35 @@
+===============================#{}和${}取值的区别============================
+#{}可以获取map中的值或者pojo对象属性的值
+${}可以获取map中的值或则pojo对象的属性值
+区别：sql 语句 = 和 ？ 和区别
+通过 where id=${id} 即where id=1
+     where id=#{id} 即where id=？ 预编译的形式，将参数注入SQL语句中
+     一般情况下我们都是使用#{},但是 sql语句 预编译不支持的
+     如排序，分表 order by ${lastName}
+#{}更加丰富的用法：规定参数的一些规则
+     javaType ，jdbcType，mode（存储过程）。。。
+     jdbcType通常要遭某中特定的条件下被设置：
+        如我们数据为空的时候，有些数据库可能不能识别mybatis对null的默认处理，
+        如Oracle会报错，因为mybatis对所有的null都映射的原生的jdbc的OTHER类型
+           两种解决办法:
+         1、#{email，jdbcType=OTHER}
+         2、全局配置中的settings
+            设置<setting name="jdbcTypeForNull" value="NULL"/>
+            mysql 和 Oracle 都认识
+===================================绑定多个参数=============================
+public Employee getEmp(@Param("id" Integer,String lastName){
+       映射文件中取值 id==>#{param1/id} lastName==>#{param2}
+}
+public Employee getEmp(Integer id,@Param("e") Employee emp){
+    id==>#{param1} emp==>#{param2.lastName/e.lastName}
+}
+特别注意，如果是Collection（List，Set）类型或者是数组
+也会特殊处理，放传入的值list或数组封装在map中
+key：Collection(collection)
+     List(list)
+     数组(array)
+public Employee getEmp(List <Integer> ids){
+    映射文件中集合名小写list[] collection[] array[]
+    #{list[0]} 不能写ids[0]
+}
+================================Mybatis源码理解=============================

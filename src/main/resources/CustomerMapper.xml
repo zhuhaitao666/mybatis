@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.model.Customer">
+    <!--根据客户编号获取客户信息,返回类为全类名-->
+    <select id="findCustomerById" resultType="com.xxx.model.Customer"
+            parameterType="int">
+        select c.id cid,username,jobs,phone from customer c where id = #{id}
+    </select>
+    <!--根据字段名模糊查询 ${} 在sql语句中表示拼接SQL的字符串
+    ${value} 则表示的是拼接的是简单类型参数-->
+    <select id="findCustomerByName" resultType="com.xxx.model.Customer"
+            parameterType="String">
+        select * from customer where username like  '%${value }%'
+    </select>
+    <!--插入一条数据
+    keyProperty 仅对insert和update有用，插入或更新时把主键值返回给pojo类中的属性值。
+    联合主键可以设置多个,用逗号隔开
+    useGeneratedKeys="true" 使mybatis使用JDBC的getGeneratedKeys()方法来获取数据库生产的主键
+    即自增
+    keyColumn="2" 属性在主键不是pojo类的第一个属性时，需要设置该属性 联合主键时，用逗号隔开
+
+    如果数据库不支持主键自增，如Oracle 则可以增加以下代码 设置主键自增
+      <selectKey keyProperty="id" resultType="Integer" order="BEFORE">
+          select if(max (id)) is null ,1,max(id)+1 as newId from customer
+      </selectKey>
+      如果表中无数据，id为1，不为空值加一 order表示true表示在插入数据前通过selectKey设置主键，
+      false表示在插入数据后执行
+    -->
+    <insert id="addOneCustomer" parameterType="com.xxx.model.Customer" keyProperty="id"
+        useGeneratedKeys="true">
+        insert into customer(username,jobs,phone)
+        value (#{username},#{jobs},#{phone});
+    </insert>
+
+    <update id="UpdateOneCustomer" parameterType="com.xxx.model.Customer">
+
+    <selectKey keyProperty="id" resultType="int" order="BEFORE">
+        select id from customer where username=#{username};
+    </selectKey>
+        update customer set jobs=#{jobs},phone=#{phone} where username=#{username};
+    </update>
+    <!--sql表示把SQL语句中想用的部分抽取出来，避免了mapper映射文件的臃肿-->
+
+
+    <!--定义要查询的列-->
+    <sql id="customerColumns">
+        id,username,jobs,phone
+    </sql>
+    <!--定义表的前缀名-->
+    <sql id="tablename">
+        ${prefix}customer
+    </sql>
+    <!--定义要查询的表-->
+    <sql id="someinclude">
+        from <include refid="${include_target}" />
+    </sql>
+    <!--根据sql元素 获取sql语句各个部分 来查找id对应的列-->
+    <select id="findCustomersByIdSql" resultType="com.xxx.model.Customer" parameterType="int">
+        select
+        <include refid="customerColumns"/>
+        <include refid="someinclude">
+            <property name="prefix" value=""/>
+            <property name="include_target" value="tablename"/>
+        </include>
+        where id=#{id}
+    </select>
+
+    <!--ResultMap元素表示结果映射集，用于定义映射结果集，级联以及定义类型转化器-->
+
+</mapper>
+

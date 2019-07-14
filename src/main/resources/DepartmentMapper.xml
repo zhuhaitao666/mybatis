@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.dao.DepartmentMapper">
+    <select id="getDepartmentById" resultType="com.xxx.model.Department">
+        select id,departmentname deptName from department  where id = #{id};
+    </select>
+
+
+    <resultMap id="DC" type="com.xxx.model.Department">
+        <id column="did" property="id"></id>
+        <result column="departmentname" property="deptName"/>
+        <!--Collection对集合类型进行封装
+            指定集合中类型用ofType
+            在集合中定义元素的封装规则
+        -->
+        <collection property="customers" ofType="com.xxx.model.Customer">
+            <id column="cid" property="id"></id>
+            <result column="username" property="username"></result>
+            <result column="jobs" property="jobs"></result>
+            <result column="phone" property="phone"></result>
+        </collection>
+    </resultMap>
+    <select id="getDepartmentAndCustomerById" resultMap="DC">
+        SELECT d.id did,d.departmentname,c.id cid,
+        c.username,c.jobs,c.phone
+        FROM department d LEFT JOIN customer c ON d.id=c.id
+        where d.id=#{id};
+    </select>
+
+    <resultMap id="DCStep" type="com.xxx.model.Department">
+        <id column="id" property="id"></id>
+        <result column="departmentname" property="deptName"></result>
+        <collection property="customers"
+                    select="com.xxx.dao.CustomerMapper.findCustomersByDepartment"
+                    ofType="com.xxx.model.Customer" column="id">
+        </collection>
+    </resultMap>
+    <select id="getDepartmentAndCustomerByStep" resultMap="DCStep">
+        select * from department d where  d.id=#{id};
+    </select>
+
+</mapper>

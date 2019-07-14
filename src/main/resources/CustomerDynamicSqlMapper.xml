@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.dao.CustomerDynamicSqlMapper">
+    <!--flushInterval 缓存时间 默认不清空
+        eviction="FIFO" 缓存的回收机制
+    -->
+    <cache eviction="FIFO" readOnly="true" flushInterval="60000"></cache>
+    <!--public List<Customer> getCustomersByIf(Customer customer);-->
+    <select id="getCustomersByIf" resultType="com.xxx.model.Customer">
+        select * from  customer
+        <where>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+            <if test="username!=null">
+                and username like #{username}
+            </if>
+            <if test="jobs!=null">
+                and jobs=#{jobs}
+            </if>
+            <if test="phone!=null">
+                and phone=#{phone}
+            </if>
+        </where>
+    </select>
+    <!--public void update(Customer customer);-->
+    <update id="update">
+        update  customer
+        <set>
+            <if test="username!=null">
+                username=#{username},
+            </if>
+            <if test="jobs!=null">
+                jobs=#{jobs},
+            </if>
+            <if test="phone!=null">
+                phone=#{phone}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    <!--public List<Customer> getCustomersByForeach(Integer ids[]);-->
+    <select id="getCustomersByForeach" resultType="com.xxx.model.Customer">
+
+        /*
+          用来指定要遍历的集合：
+              collection:表示传值类型
+              list类型的参数会特殊处理封装在map中，map的key就叫list
+              item：将当前遍历出的元素赋值给指定的变量
+              separator：每个元素之间的分隔符
+              open：遍历出结果拼接的开始的字符串
+              close:遍历结束拼接的字符串
+              index：索引，遍历list的时候index就是索引，item就是当前值
+                            遍历map的时候index表示的就是map的key，
+                            item就是key的值
+        这里的类型只能指定为list类型或则collection类型
+        也可以在接口中进行参数的绑定
+        */
+
+        select  * from customer where id in
+        <foreach collection="ids" separator="," open="(" close=")" item="item_id">
+              #{item_id}
+        </foreach>
+
+    </select>
+    <select id="getCustomerById" resultType="com.xxx.model.Customer">
+        select * from customer where id=#{id}
+    </select>
+</mapper>

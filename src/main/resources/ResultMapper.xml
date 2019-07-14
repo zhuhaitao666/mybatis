@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.dao.CustomerMapper">
+    <resultMap id="myMap" type="com.xxx.model.Customer">
+        <id column="id" property="id"></id>
+        <result column="jobs" property="jobs"></result>
+        <!--不指定的列会把数据库中的列名和pojo类中属性名，
+        名字相同的自动进行绑定
+        -->
+    </resultMap>
+    <select id="findCustomerByResultMap" resultMap="myMap">
+        select * from customer where id=#{id};
+    </select>
+    <resultMap id="CD" type="com.xxx.model.Customer">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"/>
+        <result column="jobs" property="jobs"/>
+        <result column="phone" property="phone"/>
+        <!--<result column="did" property="dept.id"/>-->
+        <!--<result column="departmentname" property="dept.deptName"/>-->
+        <!--
+            另外一种方式，使用了association 指定联合的pojo对象
+        -->
+        <association property="dept" javaType="com.xxx.model.Department">
+            <id column="did" property="id"></id>
+            <result column="departmentname" property="deptName"></result>
+        </association>
+    </resultMap>
+    <select id="findCustomerAndDept" resultMap="CD">
+            SELECT c.id id,c.jobs,c.phone,c.username,d.id did,d.departmentname
+            FROM customer c,department d
+            where c.d_id=d.id and c.id=2;
+    </select>
+
+    <!--使用association进行分步查询-->
+    <resultMap id="CusAndDeptByStep" type="com.xxx.model.Customer">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"/>
+        <result column="jobs" property="jobs"/>
+        <result column="phone" property="phone"/>
+        <!--select表示那个命名空间下的一个封装的接口方法
+            column表示传递给分步查询的传递的值
+            pojo的属性要和查询得到的列名对应，才能赋值，不然为空
+            如 数据库列departmentname 和 deptName
+            pojo属性和查询到的数据列名字不同，一般可以通过查询起别名解决
+        -->
+        <association property="dept"
+                     select="com.xxx.dao.DepartmentMapper.getDepartmentById"
+                     column="d_id">
+        </association>
+
+    </resultMap>
+
+    <select id="findCustomerAndDeptByStep" resultMap="CusAndDeptByStep">
+        select * from customer where id=#{id}
+    </select>
+
+
+    <!--ResultMap元素表示结果映射集，用于定义映射结果集，级联以及定义类型转化器-->
+    <resultMap id="resultMap" type="com.xxx.model.Customer">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+        <result property="jobs" column="jobs"></result>
+        <result property="phone" column="phone"/>
+        <!--鉴别器 javaType 类型 column 对哪一列进行鉴别、
+            鉴别器鉴别如果电话是3 就分步查出部门。不然部门对象为空
+        -->
+        <discriminator javaType="String" column="phone">
+            <!--case中的ResultType不能少，否则会报空指针异常-->
+            <case value="3" resultType="com.xxx.model.Customer">
+                <association property="dept"
+                             select="com.xxx.dao.DepartmentMapper.getDepartmentById"
+                             column="d_id">
+                </association>
+            </case>
+        </discriminator>
+    </resultMap>
+    <select id="findCustomerByDiscriminatorAndStep" resultMap="resultMap">
+        select * from customer where id=#{id};
+    </select>
+
+</mapper>

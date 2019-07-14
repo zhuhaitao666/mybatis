@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--命名空间设置为接口的全类名，与接口进行绑定-->
+<mapper namespace="com.xxx.dao.CustomerMapper">
+
+    <!--封装的SQL的id也和接口的方法名一样，进行绑定-->
+    <select id="getCustomerById" resultType="com.xxx.model.Customer">
+        select * from customer where id = #{id}
+    </select>
+    <!--在mybatis中如果传递多个参数的时候，他会帮你封装成一个Map对象
+        通过键值对应的方式来进行sql参数的绑定
+        key：接口中@param 对应的值
+        value：
+        仍然使用#{属性名}，会报异常
+        org.apache.ibatis.binding.BindingException:
+        Parameter 'username' not found.
+        Available parameters are [0, 1, param1, param2]
+    -->
+    <select id="findCustomerByNameAndJobs"  resultType="com.xxx.model.Customer">
+        select * from customer where 1=1
+        <if test="username!=null and username!=''">
+            and  username like  concat('%',#{username},'%')
+        </if>
+        <if test="job!=null and job!=''">
+            and jobs=#{job}
+        </if>
+    </select>
+
+
+    <select id="findCustomerByMap" resultType="com.xxx.model.Customer">
+        select * from customer where 1=1
+        <if test="username!=null and username!=''">
+            and  username like  concat('%',#{username},'%')
+        </if>
+        <if test="jobs!=null and jobs!=''">
+            and jobs=#{jobs}
+        </if>
+    </select>
+    <select id="findCustomerByNameReturnCustomerMap" resultType="Map">
+        select  * from  customer where username like #{username}
+    </select>
+    <select id="findCustomersByDepartment" resultType="com.xxx.model.Customer">
+       select * from customer where d_id=#{id};
+    </select>
+
+</mapper>

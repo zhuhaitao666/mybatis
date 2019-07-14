@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--主配置文件中的子元素必须按照下面的顺序-->
+    <properties resource="db.properties"></properties>
+   <!--
+       settings用于设置mybatis的运行行为
+        <setting name="mapUnderscoreToCamelCase" value="true"/> 该属性默认为false
+       设置为true时，将小驼峰命名的属性和数据库中_前缀名对应的属性进行绑定
+       lastName = t_lastName
+    -->
+
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--级联的延时加载-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <!--二级缓存默认开启-->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+    <typeAliases>
+        <!--为全类名起别名-->
+        <typeAlias type="com.xxx.model.Customer" alias="cus"/>
+       <!-- <package name="com.xxx.model"></package> 扫描组件包的方式用注解起别名
+       @Alias (value="user" )
+       public class User{
+
+       }
+       -->
+    </typeAliases>
+
+    <!--mybatis
+    在预处理语句时中设置了一个参数或者从结果集中取出一个值，都会用框架内部的类型处理来进行相关处理
+    ，typeHandler就是将预处理语句中的参数从java类型转换成jdbc类型，或者反过来
+    <typeHandlers>
+        <package name=""></package>
+    </typeHandlers>
+    <typeHandlers>
+        <typeHandler handler=""></typeHandler>
+    </typeHandlers>
+    -->
+    <environments default="mysql">
+        <!--还有一个子元素transactionManager ，而且该元素必须放在数据源之前，不然在解析xml的时候会报错-->
+        <environment id="mysql">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+       <!-- <package name=""></package>包名
+        <mapper class=""></mapper>类名
+         <mapper url=""></mapper>本地文件
+       -->
+        <mapper resource="CustomerMapper.xml"></mapper>
+        <mapper resource="UserMapper.xml" />
+        <mapper resource="ResultMapper.xml"/>
+        <mapper resource="DepartmentMapper.xml"/>
+        <mapper resource="CustomerDynamicSqlMapper.xml"/>
+    </mappers>
+</configuration>
